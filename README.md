@@ -18,5 +18,8 @@ Not entering an operator will function as if "+" was entered.  In the screenshot
 
 ![](https://imgur.com/dCcXMLQ.png)
 
+Would then become:
+![](https://imgur.com/TdH6T5G.png)
+
 Entering "&ast;10" will result in the HNs being multiplied by 10, adding a trailing zero.
 ![](https://imgur.com/ZLYlRFv.png)
