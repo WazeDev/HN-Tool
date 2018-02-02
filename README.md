@@ -15,6 +15,7 @@ Supported operators: + - / *
 Example:
 
 Not entering an operator will function as if "+" was entered.  In the screenshot below, 10000 will be added to the existing HNs changing them from 5434 to 15434.
+
 ![](https://imgur.com/dCcXMLQ.png)
 
 Entering "&ast;10" will result in the HNs being multiplied by 10, adding a trailing zero.
