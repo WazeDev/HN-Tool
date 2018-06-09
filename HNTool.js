@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         	WME HN Tool (JustinS83 fork)
 // @description		Highlights un-nudged house numbers
-// @version      	2018.02.02.01
+// @version      	2018.06.09.01
 // @author			SAR85/JustinS83
 // @copyright		SAR85
 // @license		 	CC BY-NC-ND
@@ -24,13 +24,11 @@
         messageBar;
     var debug = false;
     var MultiAction, UpdateHouseNumberGeometry, settings;
+    var stackedHNHighlightLayer;
 
     function saveSettings() {
         if (localStorage) {
-            var localsettings = {
-                HNAdjustVal: settings.HNAdjustVal
-            };
-
+            var localsettings = {HNAdjustVal: settings.HNAdjustVal};
             localStorage.setItem("hntool_Settings", JSON.stringify(localsettings));
         }
     }
@@ -55,36 +53,72 @@
     function changeHighlight(marker, highlight) {
         //var color = highlight ? '#FFAD85' : 'white';
         if (marker) {
-            marker.icon.$div.find('.uneditable-number').
-                    css('background-color', highlight);
+            marker.icon.$div.find('.uneditable-number').css('background-color', highlight);
 
             if(marker.inputWrapper)
                 marker.inputWrapper.css('background-color', highlight);
         }
     }
 
+    function highlightStackedHNs(){
+        stackedHNHighlightLayer.removeAllFeatures();
+        let clusters = [];
+        _.each(hnMarkerLayer.markers, function(marker){
+            if(clusters.length > 0){
+                let added = false;
+                for(let i=0;i<clusters.length; i++){
+                    if(!added)
+                        for(let k=0;k<clusters[i].length;k++){
+                            if(Math.abs(parseInt($(clusters[i][k].icon.div).css('left').slice(0,-2)) - parseInt($(marker.icon.div).css('left').slice(0,-2))) <=2 && Math.abs(parseInt($(clusters[i][k].icon.div).css('top').slice(0,-2)) - parseInt($(marker.icon.div).css('top').slice(0,-2))) <=2){
+                                //we are within 2 pixels of one of the cluster points, so add to that cluster
+                                clusters[i].push(marker);
+                                added = true;
+                                break;
+                            }
+                        }
+                }
+                if(!added)
+                    clusters.push([marker]);
+            }
+            else
+                clusters.push([marker]);
+        });
+        let attributes = {
+            name: ""
+        };
+        var radius = 1 + ((10-W.map.zoom) * 1) + (W.map.zoom <= 6 ? 3 : 0);
+        _.each(clusters, function(cluster){
+            if(cluster.length > 1){
+                let centerpt = new OL.Geometry.Point(cluster[0].model.geometry.x, cluster[0].model.geometry.y);
+                let style = {
+                    strokeColor: '#FDA400', strokeOpacity: 1, strokeWidth: 5, fillColor: '#FDA400', fillOpacity: 1,
+                    label: "", labelOutlineColor: "black", labelOutlineWidth: 3, fontSize: 14,
+                    fontColor: "orange", fontOpacity: 1, fontWeight: "bold"};
+                let poly = new OL.Geometry.Polygon.createRegularPolygon(centerpt, radius, 40, 0);
+                let feature = new OL.Feature.Vector(poly, attributes, style);
+                stackedHNHighlightLayer.addFeatures([feature]);
+            }
+        });
+    }
+
     /**
      * Highlights never-edited house numbers.
      */
-	function highlightUntouched(retryCount) {
+    function highlightUntouched(retryCount) {
         //console.log("HN Tool - highlightUntouched");
-        var i,
-            n,
-            marker,
-            hnMarkers;
+        var i, n, marker, hnMarkers;
 		retryCount = retryCount || 0;
-		hnMarkers = hnMarkerLayer.markers;
-		if (hnMarkers.length === 0) {
-			if (retryCount < 1000) {
+        hnMarkers = hnMarkerLayer.markers;
+        if (hnMarkers.length === 0) {
+            if (retryCount < 1000) {
                 if(debug)
                     console.debug('HN Tool: HN Markers not found. Retry #' + (retryCount + 1));
-				setTimeout(function () {
-					highlightUntouched(++retryCount);
-				}, 10);
-			} else {
-				console.debug('HN Tool: HN Markers not found. Giving up.');
-				return;
-			}
+                setTimeout(function () {highlightUntouched(++retryCount);}, 10);
+            }
+            else {
+                console.debug('HN Tool: HN Markers not found. Giving up.');
+                return;
+            }
 		}
 		for (i = 0, n = hnMarkers.length; i < n; i++) {
 			marker = hnMarkers[i];
@@ -106,6 +140,7 @@
 		if (layers.length > 0) {
 			hnMarkerLayer = layers[0];
 			highlightUntouched();
+            setTimeout(highlightStackedHNs, 750);
 		}
     }
 
@@ -117,10 +152,9 @@
      * Stores version and changes info and alerts user.
      */
 	function updateAlert() {
-		var hnVersion = '2018.02.02.01',
+		var hnVersion = GM_info.script.version,
 			alertOnUpdate = true,
-            versionChanges = 'WME Highlight HNs has been updated to ' +
-                hnVersion + '.\n';
+            versionChanges = `WME Highlight HNs has been updated to ${hnVersion}.\n`;
 
         versionChanges += 'Changes:\n';
         versionChanges += '[*] Adjust house numbers button is now available.  See the greasyfork page or forum thread for formatting details.';
@@ -147,6 +181,7 @@
             W.model.actionManager.events.register("afterclearactions",null, delayedCheckForHNLayer);
             W.model.actionManager.events.register("afteraction",null, checkForHNLayer);
             W.model.actionManager.events.register("noActions", null, checkForHNLayer);
+            W.map.events.register("zoomend", null, highlightStackedHNs);
 
             if(WazeWrap.User.Rank() > 3){
                 var $HNToolClearHNs = $("<div>");
@@ -176,10 +211,12 @@
             }
         }
         else{
+            stackedHNHighlightLayer.removeAllFeatures();
             W.model.actionManager.events.unregister("afterundoaction",null, checkForHNLayer);
             W.model.actionManager.events.unregister("afterclearactions",null, delayedCheckForHNLayer);
             W.model.actionManager.events.unregister("afteraction",null, checkForHNLayer);
             W.model.actionManager.events.unregister("noActions", null, checkForHNLayer);
+            W.map.events.unregister("zoomend", null, highlightStackedHNs);
         }
     }
 
@@ -256,6 +293,10 @@
 			messagePrefix: 'WME HN Tool:'
         });
         */
+        stackedHNHighlightLayer = new OL.Layer.Vector("HNToolStackedHNs",{displayInLayerSwitcher: false,uniqueName: "__HNToolStackedHNs"});
+        W.map.addLayer(stackedHNHighlightLayer);
+        stackedHNHighlightLayer.setVisibility(true);
+        stackedHNHighlightLayer.setOpacity(0.6);
 
 		console.debug('HN Tool: Initialized.');
 		updateAlert();
@@ -267,8 +308,7 @@
     function hnBootstrap(count) {
         count = count || 0;
 
-        if (
-            W &&
+        if (W &&
             W.map &&
             W.map.events &&
             W.map.events.register &&
@@ -280,12 +320,9 @@
 
 		} else if (count < 10) {
 			console.debug('HN Tool: Bootstrap failed. Trying again...');
-			window.setTimeout(function () {
-				hnBootstrap(++count);
-			}, 1000);
-		} else {
+			setTimeout(function () {hnBootstrap(++count);}, 1000);
+		} else
 			console.error('HN Tool: Bootstrap error.');
-		}
     }
 
 	console.debug('HN Tool: Bootstrap...');
