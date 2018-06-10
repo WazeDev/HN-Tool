@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         	WME HN Tool (JustinS83 fork)
 // @description		Highlights un-nudged house numbers
-// @version      	2018.06.09.01
+// @version      	2018.06.09.02
 // @author			SAR85/JustinS83
 // @copyright		SAR85
 // @license		 	CC BY-NC-ND
@@ -157,7 +157,7 @@
             versionChanges = `WME Highlight HNs has been updated to ${hnVersion}.\n`;
 
         versionChanges += 'Changes:\n';
-        versionChanges += '[*] Adjust house numbers button is now available.  See the greasyfork page or forum thread for formatting details.';
+        versionChanges += '[*] Highlighting of stacked house numbers.';
 
         if (alertOnUpdate && window.localStorage &&
             window.localStorage.hnVersion !== hnVersion) {
