@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         	WME HN Tool (JustinS83 fork)
 // @description		Highlights un-nudged house numbers
-// @version      	2018.06.09.02
+// @version      	2018.06.24.01
 // @author			SAR85/JustinS83
 // @copyright		SAR85
 // @license		 	CC BY-NC-ND
@@ -187,7 +187,7 @@
                 var $HNToolClearHNs = $("<div>");
                 $HNToolClearHNs.html([
                     '<div id="HNToolClearHNsDiv" class="toolbar-button" title="Clear house numbers" style="float:left;">',
-                    '<span id="HNToolClearHNsButton"><i class="fa fa-times-circle" style="color:red;" aria-hidden="true"></i> Clear house numbers</span>',
+                    '<span id="HNToolClearHNsButton"><i class="fa fa-times-circle" style="color:red;" aria-hidden="true"></i> Clear HNs</span>',
                     '</div>'
                 ].join(' '));
                 $('.add-house-number').before($HNToolClearHNs.html());
@@ -196,7 +196,7 @@
                 var $HNToolAdjustHNs = $("<div>");
                 $HNToolAdjustHNs.html([
                     '<div id="HNToolAdjustHNsDiv" class="toolbar-button" title="The amount to adjust all existing house numbers on this segment" style="float:left;">',
-                    '<span id="HNToolAdjustHNsButton"><i class="fa fa-magic" aria-hidden="true"></i> Adjust house numbers</span>',
+                    '<span id="HNToolAdjustHNsButton"><i class="fa fa-magic" aria-hidden="true"></i> Adjust HNs</span>',
                     '<input type="text" id="HNToolHNAdjustAmount" style="height:20px;; width: 64px; text-align: right">',
                     '</div>'
                 ].join(' '));
