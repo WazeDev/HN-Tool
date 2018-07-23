@@ -12,6 +12,7 @@
 // @exclude                     https://www.waze.com/user/editor*
 // @require                     https://greasyfork.org/scripts/24851-wazewrap/code/WazeWrap.js
 // @namespace		https://greasyfork.org/users/30701-justins83-waze
+// @contributionURL https://github.com/WazeDev/Thank-The-Authors
 // ==/UserScript==
 
 /* global W */
