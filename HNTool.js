@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         	WME HN Tool (JustinS83 fork)
 // @description		Highlights un-nudged house numbers
-// @version      	2018.06.24.01
+// @version      	2018.08.16.01
 // @author			SAR85/JustinS83
 // @copyright		SAR85
 // @license		 	CC BY-NC-ND
@@ -12,7 +12,7 @@
 // @exclude                     https://www.waze.com/user/editor*
 // @require                     https://greasyfork.org/scripts/24851-wazewrap/code/WazeWrap.js
 // @namespace		https://greasyfork.org/users/30701-justins83-waze
-// @contributionURL https://github.com/WazeDev/Thank-The-Authors
+// @contributionURL     https://github.com/WazeDev/Thank-The-Authors
 // ==/UserScript==
 
 /* global W */
@@ -115,6 +115,7 @@
                 if(debug)
                     console.debug('HN Tool: HN Markers not found. Retry #' + (retryCount + 1));
                 setTimeout(function () {highlightUntouched(++retryCount);}, 10);
+                return;
             }
             else {
                 console.debug('HN Tool: HN Markers not found. Giving up.');
@@ -124,7 +125,7 @@
 		for (i = 0, n = hnMarkers.length; i < n; i++) {
 			marker = hnMarkers[i];
             var color = 'white';
-			if (marker.model && null === marker.model.updatedBy)
+			if (marker.model && !marker.model.hasOwnProperty("updatedBy"))
                 color = '#FFAD85';
             else if (marker.model && marker.model.updatedBy === W.loginManager.user.id)
                 color = '#85ffad';
