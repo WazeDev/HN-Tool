@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         	WME HN Tool (JustinS83 fork)
 // @description		Highlights un-nudged house numbers
-// @version      	2018.08.16.02
+// @version      	2019.03.15.01
 // @author			SAR85/JustinS83
 // @copyright		SAR85
 // @license		 	CC BY-NC-ND
@@ -16,6 +16,12 @@
 // ==/UserScript==
 
 /* global W */
+/* global _ */
+/* global $ */
+/* global OL */
+/* global require */
+/* global WazeWrap */
+/* eslint curly: ["warn", "multi-or-nest"] */
 
 (function () {
     'use strict';
@@ -257,9 +263,8 @@
                     if (currMarker.model.updatedBy === null) {
                         var newGeometry = currMarker.model.geometry.clone();
                         newGeometry.x += 0.000000001;
-                        multiaction.doSubAction(new UpdateHouseNumberGeometry(currMarker.model, currMarker.model.geometry, newGeometry));
+                        multiaction.doSubAction(new UpdateHouseNumberGeometry(currMarker.model, newGeometry, currMarker.model.fractionPoint, currMarker.model.segID));
                     }
-                    multiaction.doSubAction(new UpdateHN(currMarker.model.parent, currMarker.model, updateObject));
                     W.model.actionManager.add(multiaction);
                 }
             }
@@ -269,13 +274,12 @@
     }
 
     function clearHNs(){
-        let HouseNumber = require('Waze/Action/HouseNumber');
+        let DeleteHouseNumber = require('Waze/Actions/DeleteHouseNumber');
         let currMarker;
-        W.model.actionManager.add(new HouseNumber.DeleteHouseNumber(W.map.getLayersByName('houseNumberMarkers')[0].markers[0].model.parent,W.map.getLayersByName('houseNumberMarkers')[0].markers[0].model));
         let markerCount = W.map.getLayersByName('houseNumberMarkers')[0].markers.length;
         for(let i=markerCount-1; i>-1; i--){
             currMarker = W.map.getLayersByName('houseNumberMarkers')[0].markers[i];
-            W.model.actionManager.add(new HouseNumber.DeleteHouseNumber(currMarker.model.parent, currMarker.model));
+            W.model.actionManager.add(new DeleteHouseNumber(currMarker.model));
         }
     }
 
@@ -287,7 +291,7 @@
         var segmentEditor = window.require('Waze/Feature/Vector/Segment');
 
         MultiAction = require('Waze/Action/MultiAction');
-        UpdateHouseNumberGeometry = require('Waze/Action/UpdateHouseNumberGeometry');
+        UpdateHouseNumberGeometry = require('Waze/Action/MoveHouseNumber');
         W.editingMediator.on('change:editingHouseNumbers', toggleInterface);
 
         /*
