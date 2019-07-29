@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         	WME HN Tool (JustinS83 fork)
 // @description		Highlights un-nudged house numbers
-// @version      	2019.05.03.01
+// @version      	2019.07.29.01
 // @author			SAR85/JustinS83
 // @copyright		SAR85
 // @license		 	CC BY-NC-ND
@@ -263,7 +263,7 @@
                     if (currMarker.model.updatedBy === null) {
                         var newGeometry = currMarker.model.geometry.clone();
                         newGeometry.x += 0.000000001;
-                        multiaction.doSubAction(new UpdateHouseNumberGeometry(currMarker.model, newGeometry, currMarker.model.fractionPoint, currMarker.model.segID));
+                        multiaction.doSubAction(new UpdateHouseNumberGeometry(currMarker.model, newGeometry, currMarker.model.attributes.fractionPoint, currMarker.model.attributes.segID));
                     }
                     W.model.actionManager.add(multiaction);
                 }
